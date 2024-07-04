@@ -125,6 +125,12 @@ variable "subnet_cidrs" {
       "cidr_block" : "172.16.1.0/24",
       "is_multicast" : true,
       "availability_zone" : "eu-frankfurt-1",
+    },
+    {
+      "name" : "hbase_subnet_2",
+      "cidr_block" : "172.16.2.0/24",
+      "is_multicast" : true,
+      "availability_zone" : "eu-frankfurt-2",
     }
   ]
 }
@@ -175,7 +181,7 @@ variable "vpc_acl_tags" {
 variable "enable_nat_gateway" {
   type        = bool
   description = "Enable the creation of the NAT gateway"
-  default     = false
+  default     = true
 }
 
 variable "nat_gateway_public_ips" {

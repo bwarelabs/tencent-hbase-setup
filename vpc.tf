@@ -58,3 +58,23 @@ module "acls" {
 
   depends_on = [tencentcloud_subnet.subnet]
 }
+
+################################################################################
+# NAT
+################################################################################
+
+resource "tencentcloud_eip" "nat_eip" {
+  count = var.enable_nat_gateway && length(var.nat_gateway_public_ips) == 0 ? 1 : 0
+  name  = format("%s%s", var.stack, "natip")
+  tags  = var.nat_gateway_tags
+}
+
+resource "tencentcloud_nat_gateway" "nat" {
+  count            = var.enable_nat_gateway ? 1 : 0
+  name             = format("%s%s", var.stack, "nat")
+  vpc_id           = var.vpc_id != "" ? var.vpc_id : tencentcloud_vpc.vpc[0].id
+  bandwidth        = var.nat_gateway_bandwidth
+  max_concurrent   = var.nat_gateway_concurrent
+  assigned_eip_set = length(var.nat_gateway_public_ips) > 0 ? var.nat_gateway_public_ips : tencentcloud_eip.nat_eip.*.public_ip
+  tags             = var.nat_gateway_tags
+}
