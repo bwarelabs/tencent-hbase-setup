@@ -33,7 +33,7 @@ variable "management_instance_count" {
 variable "management_instance_name" {
   type        = string
   description = "The instace management name prefix"
-  default     = "solana"
+  default     = "hbase-management"
 }
 
 variable "management_instance_project" {
