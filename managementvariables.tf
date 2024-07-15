@@ -89,7 +89,7 @@ variable "management_instance_tags" {
   description = "Specify one or more tags for the instance"
   default = {
     "network" : "tencent",
-    "type" : "hbase",
+    "type" : "management",
   }
 }
 

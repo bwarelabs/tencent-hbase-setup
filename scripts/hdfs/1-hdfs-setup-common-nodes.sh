@@ -3,6 +3,7 @@
 HADOOP_VERSION={{hadoop_version}}
 HADOOP_HOME={{hadoop_home}}
 JAVA_HOME={{java_home}}
+ZOOKEEPER_IPS={{zookeeper_ips}}
 
 install_machine_packages() {
     echo "install_machine_packages: installing packages on the node"
@@ -55,27 +56,12 @@ configure_hadoop_core() {
 <configuration>
   <property>
     <name>fs.defaultFS</name>
-    <value>hdfs://master:9000</value>
+    <value>hdfs://solana</value>
   </property>
-</configuration>
-EOT
-}
 
-configure_hadoop_site() {
-    echo "configure_hadoop_site: configure hadoop site"
-    cat <<EOT > $HADOOP_HOME/etc/hadoop/hdfs-site.xml
-<configuration>
   <property>
-    <name>dfs.replication</name>
-    <value>3</value>
-  </property>
-  <property>
-    <name>dfs.namenode.name.dir</name>
-    <value>file:///usr/local/hadoop/hdfs/namenode</value>
-  </property>
-  <property>
-    <name>dfs.datanode.data.dir</name>
-    <value>file:///usr/local/hadoop/hdfs/datanode</value>
+    <name>ha.zookeeper.quorum</name>
+    <value>$zookeeper_ips</value>
   </property>
 </configuration>
 EOT
@@ -90,4 +76,3 @@ install_hadoop_packages
 set_environment_variables
 configure_hadoop_env
 configure_hadoop_core
-configure_hadoop_site
