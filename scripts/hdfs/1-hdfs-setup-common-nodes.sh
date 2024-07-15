@@ -61,7 +61,7 @@ configure_hadoop_core() {
 
   <property>
     <name>ha.zookeeper.quorum</name>
-    <value>$zookeeper_ips</value>
+    <value>$ZOOKEEPER_IPS</value>
   </property>
 </configuration>
 EOT
