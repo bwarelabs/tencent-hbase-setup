@@ -14,6 +14,12 @@ variable "hadoop_home" {
   default     = "/usr/local/hadoop"
 }
 
+variable "hadoop_data_dir" {
+  type        = string
+  description = "HADOOP data directory"
+  default     = "/var/lib/hadoop"
+}
+
 variable "java_home" {
   type        = string
   description = "Java home directory"

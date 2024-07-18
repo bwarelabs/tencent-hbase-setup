@@ -3,6 +3,9 @@ locals {
   hdfs_setup_namenodes_file    = "/scripts/hdfs/2-hdfs-setup-namenodes.sh"
   hdfs_setup_datanodes_file    = "/scripts/hdfs/3-hdfs-setup-datanodes.sh"
   hdfs_zookeeper_ips           = join(",", [for ip in tencentcloud_instance.zookeeper_node[*].private_ip : "${ip}:2181"])
+  hdfs_zookeeper_ips_edits     = join(",", [for ip in tencentcloud_instance.zookeeper_node[*].private_ip : "${ip}:8485"])
+  hdfs_namenodes_ips           = join(",", [for ip in tencentcloud_instance.hbase_management_node[*].private_ip : "${ip}"])
+
 }
 
 resource "tencentcloud_tat_command" "hdfs-setup-common-nodes" {
@@ -33,6 +36,9 @@ resource "tencentcloud_tat_command" "hdfs-setup-namenodes" {
   enable_parameter  = true
   default_parameters = jsonencode({
     "hadoop_home" : var.hadoop_home,
+    "zookeeper_ips" : local.hdfs_zookeeper_ips,
+    "zookeeper_ips_edits" : local.hdfs_zookeeper_ips_edits,
+    "namenodes_ips" : local.hdfs_namenodes_ips,
   })
 }
 

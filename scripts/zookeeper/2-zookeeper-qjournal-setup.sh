@@ -2,9 +2,10 @@
 
 HADOOP_VERSION={{hadoop_version}}
 HADOOP_HOME={{hadoop_home}}
-JAVA_HOME={{java_home}}
-ZOOKEEPER_IPS={{zookeeper_ips}}
+HADOOP_DATA_DIR={{hadoop_data_dir}}
 HADOOP_USER="hadoop"
+JAVA_HOME={{java_home}}
+QJOURNAL_PORT=8485
 
 install_machine_packages() {
     echo "install_machine_packages: installing packages on the node"
@@ -47,39 +48,53 @@ set_environment_variables() {
       echo "export HADOOP_HOME=$HADOOP_HOME" >> ~/.bashrc
     fi
 
-    if ! grep -q "export PATH=\$PATH:\$HADOOP_HOME/hadoop-$HADOOP_VERSION-bin/bin" $HADOOP_HOME/.bashrc; then
-        echo "set_environment_variables: setting global path"
-        echo "export PATH=\$PATH:\$HADOOP_HOME/hadoop-$HADOOP_VERSION-bin/bin" >> $HADOOP_HOME/.bashrc
+    if ! grep -q "export PATH=\$PATH:\$HADOOP_HOME/bin:\$HADOOP_HOME/sbin" ~/.bashrc; then
+      echo "set_environment_variables: setting global path"
+      echo "export PATH=\$PATH:\$HADOOP_HOME/bin:\$HADOOP_HOME/sbin" >> ~/.bashrc
     fi
 
     source ~/.bashrc
 }
 
-configure_hadoop_env() {
-    echo "configure_hadoop_env: configure hadoop environment"
-    cat <<EOT > $HADOOP_HOME/etc/hadoop/hadoop-env.sh
-export JAVA_HOME=$JAVA_HOME
-EOT
-}
-
-configure_hadoop_core() {
+configure_qjournal_nodes() {
+    echo "configure_qjournal_nodes: configuring Hadoop QJournalNodes..."
     sudo mkdir -p $HADOOP_DATA_DIR
     sudo chown -R $HADOOP_USER:$HADOOP_USER $HADOOP_DATA_DIR
 
-    echo "configure_hadoop_core: configure hadoop core"
-    cat <<EOT > $HADOOP_HOME/etc/hadoop/core-site.xml
+    # Example Hadoop configuration for QJournalNodes
+    sudo mkdir -p $HADOOP_HOME/etc/hadoop
+    cat <<EOT | sudo tee $HADOOP_HOME/etc/hadoop/hdfs-site.xml
 <configuration>
   <property>
-    <name>fs.defaultFS</name>
-    <value>hdfs://solana</value>
+    <name>dfs.namenode.shared.edits.dir</name>
+    <value>qjournal://localhost:$QJOURNAL_PORT/solana</value>
   </property>
-
   <property>
-    <name>ha.zookeeper.quorum</name>
-    <value>$ZOOKEEPER_IPS</value>
+    <name>dfs.namenode.edits.dir</name>
+    <value>file://$HADOOP_DATA_DIR/edits</value>
   </property>
 </configuration>
 EOT
+
+    sudo chown -R $HADOOP_USER:$HADOOP_USER $HADOOP_HOME/etc/hadoop
+}
+
+set_environment_variables() {
+    echo "set_environment_variables: setting environment variables..."
+    if ! grep -q "export HADOOP_HOME=$HADOOP_HOME" $HADOOP_HOME/.bashrc; then
+        echo "set_environment_variables: setting Hadoop home path"
+        echo "export HADOOP_HOME=$HADOOP_HOME" >> $HADOOP_HOME/.bashrc
+    fi
+    
+    if ! grep -q "export PATH=\$PATH:\$HADOOP_HOME/hadoop-$HADOOP_VERSION-bin/bin" $HADOOP_HOME/.bashrc; then
+        echo "set_environment_variables: setting global path"
+        echo "export PATH=\$PATH:\$HADOOP_HOME/hadoop-$HADOOP_VERSION-bin/bin" >> $HADOOP_HOME/.bashrc
+    fi
+}
+
+start_qjournal_nodes() {
+    echo "start_qjournal_nodes: starting QJournalNode services..."
+    sudo -u $HADOOP_USER bash -c "source $HADOOP_HOME/.bashrc && hdfs --daemon start journalnode"
 }
 
 # ------------------------------
@@ -89,6 +104,6 @@ EOT
 install_machine_packages
 create_hadoop_user
 install_hadoop_packages
+configure_qjournal_nodes
 set_environment_variables
-configure_hadoop_env
-configure_hadoop_core
+start_qjournal_nodes

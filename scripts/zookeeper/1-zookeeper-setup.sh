@@ -81,8 +81,6 @@ set_environment_variables() {
         echo "set_environment_variables: setting global path"
         echo "export PATH=\$PATH:\$ZOOKEEPER_HOME/apache-zookeeper-$ZOOKEEPER_VERSION-bin/bin" >> $ZOOKEEPER_HOME/.bashrc
     fi
-        
-    source ~/.bashrc
 }
 
 start_zookeeper_service() {
