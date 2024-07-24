@@ -70,6 +70,27 @@ EOT
     <name>ha.zookeeper.quorum</name>
     <value>${ZOOKEEPER_IPS}</value>
   </property>
+
+  <!-- Automatic failover settings -->
+  <property>
+    <name>dfs.ha.automatic-failover.enabled</name>
+    <value>true</value>
+  </property>
+
+  <property>
+    <name>dfs.ha.zkfc</name>
+    <value>true</value>
+  </property>
+
+  <property>
+    <name>dfs.ha.zkfc.port</name>
+    <value>8019</value> <!-- Default port for ZKFC -->
+  </property>
+
+  <property>
+    <name>dfs.ha.fencing.methods</name>
+    <value>shell($HADOOP_HOME_DIR/hadoop-$HADOOP_VERSION/scripts/fencing.sh)</value>
+  </property>
 </configuration>
 EOT
 }
@@ -85,19 +106,73 @@ configure_namenode_data_dir() {
   fi
 }
 
-start_namenode_service() {
-    echo "start_namenode_service: checking if namenode service is already running..."
-    if ! sudo -u $HADOOP_USER bash -c "source $HADOOP_HOME_DIR/.bashrc && jps | grep -q NameNode"; then
-        echo "start_namenode_service: starting namenode service..."
-        sudo -u $HADOOP_USER bash -c "source $HADOOP_HOME_DIR/.bashrc && hdfs --daemon start namenode"
-        if [ $? -eq 0 ]; then
-            echo "start_namenode_service: namenode service started successfully."
-        else
-            echo "start_namenode_service: failed to start namenode service. Check the logs for details."
-        fi
+create_fencing_script() {
+    echo "create_fencing_script: create fencing script"
+    mkdir -p $HADOOP_HOME_DIR/hadoop-$HADOOP_VERSION/scripts
+    sudo chown -R $HADOOP_USER:$HADOOP_USER $HADOOP_HOME_DIR/hadoop-$HADOOP_VERSION/scripts
+    sudo touch $HADOOP_HOME_DIR/hadoop-$HADOOP_VERSION/scripts/fencing.sh
+    sudo chmod +x $HADOOP_HOME_DIR/hadoop-$HADOOP_VERSION/scripts/fencing.sh
+
+    cat <<EOT > $HADOOP_HOME_DIR/hadoop-$HADOOP_VERSION/scripts/fencing.sh
+sudo -u hadoop $HADOOP_HOME_DIR/hadoop-$HADOOP_VERSION/bin/hdfs --daemon stop namenode
+if [ $? -eq 0 ]; then
+    echo "create_fencing_script: namenode service stopped successfully."
+else
+    echo "create_fencing_script: failed to stop namenode service."
+    exit 1
+fi
+
+EOT
+}
+
+configure_namenode_zkfc() {
+  echo "configure_namenode_zkfc: "
+  FLAG_FILE="/var/lib/hadoop-hdfs/zkfc_format_done"
+
+  if [ ! -f "$FLAG_FILE" ]; then
+    echo "configure_namenode_zkfc: formatting zookeeper for hdfs..."
+    sudo -u hadoop $HADOOP_HOME_DIR/hadoop-$HADOOP_VERSION/bin/hdfs zkfc -formatZK
+    
+    if [ $? -eq 0 ]; then
+      echo "configure_namenode_zkfc: zooKeeper formatting completed successfully."
+      touch "$FLAG_FILE"
     else
-        echo "start_namenode_service: namenode service is already running."
+      echo "configure_namenode_zkfc: zooKeeper formatting failed."
+      exit 1
     fi
+  else
+    echo "configure_namenode_zkfc: zooKeeper has already been formatted."
+  fi
+}
+
+start_zkfs_service() {
+  echo "start_zkfs_service: checking if zkfc service is already running..."
+  if ! sudo -u $HADOOP_USER bash -c "source $HADOOP_HOME_DIR/.bashrc && jps | grep -q DFSZKFailoverController"; then
+      echo "start_zkfs_service: starting zkfc service..."
+      sudo -u $HADOOP_USER bash -c "source $HADOOP_HOME_DIR/.bashrc && hdfs --daemon start zkfc"
+      if [ $? -eq 0 ]; then
+          echo "start_zkfs_service: zkfc service started successfully."
+      else
+          echo "start_zkfs_service: failed to start zkfc service. Check the logs for details."
+      fi
+  else
+      echo "start_zkfs_service: zkfc service is already running."
+  fi
+}
+
+start_namenode_service() {
+  echo "start_namenode_service: checking if namenode service is already running..."
+  if ! sudo -u $HADOOP_USER bash -c "source $HADOOP_HOME_DIR/.bashrc && jps | grep -q NameNode"; then
+      echo "start_namenode_service: starting namenode service..."
+      sudo -u $HADOOP_USER bash -c "source $HADOOP_HOME_DIR/.bashrc && hdfs --daemon start namenode"
+      if [ $? -eq 0 ]; then
+          echo "start_namenode_service: namenode service started successfully."
+      else
+          echo "start_namenode_service: failed to start namenode service. Check the logs for details."
+      fi
+  else
+      echo "start_namenode_service: namenode service is already running."
+  fi
 }
 
 # ------------------------------
@@ -105,5 +180,8 @@ start_namenode_service() {
 # ------------------------------
 
 configure_hadoop_site
+create_fencing_script
 configure_namenode_data_dir
+configure_namenode_zkfc
+start_zkfs_service
 start_namenode_service
