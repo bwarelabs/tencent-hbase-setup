@@ -2,7 +2,7 @@
 
 HADOOP_VERSION={{hadoop_version}}
 HADOOP_HOME_DIR={{hadoop_home}}
-HADOOP_DATA_DIR={{hadoop_data_dir}}
+HADOOP_DATA_DIR=$HADOOP_HOME_DIR/hadoop-$HADOOP_VERSION/data
 HADOOP_USER="hadoop"
 JAVA_HOME={{java_home}}
 QJOURNAL_PORT=8485
@@ -42,8 +42,8 @@ configure_qjournal_nodes() {
     sudo chown -R $HADOOP_USER:$HADOOP_USER $HADOOP_DATA_DIR
 
     # Example Hadoop configuration for QJournalNodes
-    sudo mkdir -p $HADOOP_HOME_DIR/etc/hadoop
-    cat <<EOT | sudo tee $HADOOP_HOME_DIR/etc/hadoop/hdfs-site.xml
+    sudo mkdir -p $HADOOP_HOME_DIR/hadoop-$HADOOP_VERSION/etc/hadoop
+    cat <<EOT | sudo tee $HADOOP_HOME_DIR/hadoop-$HADOOP_VERSION/etc/hadoop/hdfs-site.xml
 <configuration>
   <property>
     <name>dfs.namenode.shared.edits.dir</name>
@@ -57,6 +57,21 @@ configure_qjournal_nodes() {
 EOT
 
     sudo chown -R $HADOOP_USER:$HADOOP_USER $HADOOP_HOME_DIR
+}
+
+format_qjournal_drive() {
+  echo "format_qjournal_drive: formatting qjournal drive..."
+  if [ -f "$HADOOP_DATA_DIR/current/VERSION" ]; then
+    echo "format_qjournal_drive: journalNode is already formatted. Skipping format."
+  else
+    sudo -u $HADOOP_USER bash -c "source $HADOOP_HOME_DIR/.bashrc && $HADOOP_HOME_DIR/hadoop-$HADOOP_VERSION/bin/hdfs journalnode -format"
+    if [ $? -eq 0 ]; then
+      echo "format_qjournal_drive: journalNode formatted successfully."
+    else
+      echo "format_qjournal_drive: error formatting JournalNode."
+      exit 1
+    fi
+  fi
 }
 
 set_environment_variables() {
@@ -96,4 +111,5 @@ create_hadoop_user
 install_hadoop_packages
 configure_qjournal_nodes
 set_environment_variables
+format_qjournal_drive
 start_qjournal_nodes

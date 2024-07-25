@@ -23,5 +23,5 @@ variable "zookeeper_data_dir" {
 variable "zookeeper_java_home" {
   type        = string
   description = "Java home directory"
-  default     = "/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.412.b08-2.tl3.x86_64"
+  default     = "/usr/lib/jvm/java-1.8.0"
 }

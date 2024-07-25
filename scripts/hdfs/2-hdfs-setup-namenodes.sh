@@ -62,13 +62,13 @@ EOT
   <!-- JournalNodes for shared edits -->
   <property>
     <name>dfs.namenode.shared.edits.dir</name>
-    <value>qjournal://${ZOOKEEPER_IPS_EDITS}/solana</value>
+    <value>qjournal://$ZOOKEEPER_IPS_EDITS/solana</value>
   </property>
 
   <!-- ZooKeeper settings -->
   <property>
     <name>ha.zookeeper.quorum</name>
-    <value>${ZOOKEEPER_IPS}</value>
+    <value>$ZOOKEEPER_IPS</value>
   </property>
 
   <!-- Automatic failover settings -->

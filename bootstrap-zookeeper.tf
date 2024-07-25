@@ -18,14 +18,14 @@ resource "tencentcloud_tat_command" "zookeeper-setup" {
     "zookeeper_home" : var.zookeeper_home,
     "zookeeper_data_dir" : var.zookeeper_data_dir,
     "zookeeper_ips" : local.zookeeper_ips,
-    "java_home" : var.java_home,
+    "java_home" : var.zookeeper_java_home,
   })
 
   depends_on = [tencentcloud_instance.zookeeper_node]
 }
 
 resource "tencentcloud_tat_command" "qjournal-setup" {
-  command_name      = "2-zookeeper-qjournal-setup.sh"
+  command_name      = "2-zookeeper-qjournal-setup"
   content           = file(join("", [path.module, local.zookeeper_qjournal_setup]))
   description       = "Install and configure Qjournal on the Zookeeper nodes"
   command_type      = "SHELL"
@@ -36,7 +36,7 @@ resource "tencentcloud_tat_command" "qjournal-setup" {
   default_parameters = jsonencode({
     "hadoop_version" : var.hadoop_version,
     "hadoop_home" : var.hadoop_home,
-    "java_home" : var.java_home,
+    "java_home" : var.zookeeper_java_home,
     "hadoop_data_dir" : var.hadoop_data_dir,
   })
 

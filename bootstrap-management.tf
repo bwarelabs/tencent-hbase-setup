@@ -5,7 +5,6 @@ locals {
   hdfs_zookeeper_ips           = join(",", [for ip in tencentcloud_instance.zookeeper_node[*].private_ip : "${ip}:2181"])
   hdfs_zookeeper_ips_edits     = join(";", [for ip in tencentcloud_instance.zookeeper_node[*].private_ip : "${ip}:8485"])
   hdfs_namenodes_ips           = join(",", [for ip in tencentcloud_instance.hbase_management_node[*].private_ip : "${ip}"])
-
 }
 
 resource "tencentcloud_tat_command" "hdfs-setup-common-nodes" {
