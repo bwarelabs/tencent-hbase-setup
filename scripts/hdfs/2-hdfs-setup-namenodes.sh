@@ -104,6 +104,8 @@ configure_namenode_data_dir() {
     echo "configure_namenode_data_dir: formatting the namenode data directory"
     sudo -u hadoop $HADOOP_HOME_DIR/hadoop-$HADOOP_VERSION/bin/hdfs namenode -format -force
   fi
+
+  sudo chown -R $HADOOP_USER:$HADOOP_USER $HADOOP_DATA_DIR/current
 }
 
 create_fencing_script() {
@@ -128,20 +130,23 @@ EOT
 configure_namenode_zkfc() {
   echo "configure_namenode_zkfc: "
   FLAG_FILE="/var/lib/hadoop-hdfs/zkfc_format_done"
-
-  if [ ! -f "$FLAG_FILE" ]; then
-    echo "configure_namenode_zkfc: formatting zookeeper for hdfs..."
-    sudo -u hadoop $HADOOP_HOME_DIR/hadoop-$HADOOP_VERSION/bin/hdfs zkfc -formatZK
-    
-    if [ $? -eq 0 ]; then
-      echo "configure_namenode_zkfc: zooKeeper formatting completed successfully."
-      touch "$FLAG_FILE"
+  if ! sudo -u $HADOOP_USER bash -c "source $HADOOP_HOME_DIR/.bashrc && jps | grep -q DFSZKFailoverController"; then
+    if [ ! -f "$FLAG_FILE" ]; then
+      echo "configure_namenode_zkfc: formatting zookeeper for hdfs..."
+      sudo -u hadoop $HADOOP_HOME_DIR/hadoop-$HADOOP_VERSION/bin/hdfs zkfc -formatZK
+      
+      if [ $? -eq 0 ]; then
+        echo "configure_namenode_zkfc: zooKeeper formatting completed successfully."
+        touch "$FLAG_FILE"
+      else
+        echo "configure_namenode_zkfc: zooKeeper formatting failed."
+        exit 1
+      fi
     else
-      echo "configure_namenode_zkfc: zooKeeper formatting failed."
-      exit 1
+      echo "configure_namenode_zkfc: zooKeeper has already been formatted."
     fi
   else
-    echo "configure_namenode_zkfc: zooKeeper has already been formatted."
+    echo "configure_namenode_zkfc: cannot format, zkfc service already running"
   fi
 }
 
