@@ -29,8 +29,8 @@ install_hadoop_packages() {
     else 
       url="https://downloads.apache.org/hadoop/common/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz"
       echo "install_hadoop_packages: downloading hadoop from $url"
-      wget $url
-      sudo tar -xzvf hadoop-$HADOOP_VERSION.tar.gz -C /usr/local
+      wget -q $url
+      sudo tar -xzf hadoop-$HADOOP_VERSION.tar.gz -C /usr/local
       sudo mv /usr/local/hadoop-$HADOOP_VERSION $HADOOP_HOME_DIR
     fi
 }

@@ -7,6 +7,7 @@ ZOOKEEPER_IPS={{zookeeper_ips}}
 NAMENODES_IPS={{namenodes_ips}}
 HADOOP_DATA_DIR=$HADOOP_HOME_DIR/hadoop-$HADOOP_VERSION/data
 HADOOP_USER="hadoop"
+ZOOKEEPER_IPS_EDITS_SEMICOLONS=$(echo $ZOOKEEPER_IPS_EDITS | sed 's/,/;/g')
 
 configure_hadoop_site() {
     echo "configure_hadoop_site: configure hadoop site"
@@ -62,7 +63,7 @@ EOT
   <!-- JournalNodes for shared edits -->
   <property>
     <name>dfs.namenode.shared.edits.dir</name>
-    <value>qjournal://$ZOOKEEPER_IPS_EDITS/solana</value>
+    <value>qjournal://$ZOOKEEPER_IPS_EDITS_SEMICOLONS/solana</value>
   </property>
 
   <!-- ZooKeeper settings -->
@@ -95,17 +96,17 @@ EOT
 EOT
 }
 
-configure_namenode_data_dir() {
-  echo "configure_namenode_data_dir: creating namenode data directory"
-  mkdir -p $HADOOP_DATA_DIR
-  sudo chown -R $HADOOP_USER:$HADOOP_USER $HADOOP_DATA_DIR
+check_if_first_node() {
+  hostname=$(hostname)
+  index=$(echo $hostname | awk -F'-' '{print $2}')
 
-  if [ -z "$(ls -A $HADOOP_DATA_DIR)" ]; then
-    echo "configure_namenode_data_dir: formatting the namenode data directory"
-    sudo -u hadoop $HADOOP_HOME_DIR/hadoop-$HADOOP_VERSION/bin/hdfs namenode -format -force
+  if [ "$index" -eq 0 ]; then
+    echo "check_if_first_node: this is the first node in the cluster"
+    return 0
+  else
+    echo "check_if_first_node: this is not the first node in the cluster"
+    return 1
   fi
-
-  sudo chown -R $HADOOP_USER:$HADOOP_USER $HADOOP_DATA_DIR/current
 }
 
 create_fencing_script() {
@@ -126,6 +127,24 @@ fi
 
 EOT
 }
+
+configure_namenode_data_dir() {
+  check_if_first_node
+  is_first=$?
+  echo "configure_namenode_data_dir: creating namenode data directory"
+  mkdir -p $HADOOP_DATA_DIR
+  sudo chown -R $HADOOP_USER:$HADOOP_USER $HADOOP_DATA_DIR
+
+  if [ -z "$(ls -A $HADOOP_DATA_DIR)" ]; then
+    if [ "$is_first" -eq 0 ]; then
+      echo "configure_namenode_data_dir: formatting the namenode data directory, this is the first namenode"
+      sudo -u hadoop $HADOOP_HOME_DIR/hadoop-$HADOOP_VERSION/bin/hdfs namenode -format -force
+    fi  
+  fi
+
+  sudo chown -R $HADOOP_USER:$HADOOP_USER $HADOOP_DATA_DIR/current
+}
+
 
 configure_namenode_zkfc() {
   echo "configure_namenode_zkfc: "
@@ -150,22 +169,15 @@ configure_namenode_zkfc() {
   fi
 }
 
-start_zkfs_service() {
-  echo "start_zkfs_service: checking if zkfc service is already running..."
-  if ! sudo -u $HADOOP_USER bash -c "source $HADOOP_HOME_DIR/.bashrc && jps | grep -q DFSZKFailoverController"; then
-      echo "start_zkfs_service: starting zkfc service..."
-      sudo -u $HADOOP_USER bash -c "source $HADOOP_HOME_DIR/.bashrc && hdfs --daemon start zkfc"
-      if [ $? -eq 0 ]; then
-          echo "start_zkfs_service: zkfc service started successfully."
-      else
-          echo "start_zkfs_service: failed to start zkfc service. Check the logs for details."
-      fi
-  else
-      echo "start_zkfs_service: zkfc service is already running."
-  fi
-}
-
 start_namenode_service() {
+  check_if_first_node
+  is_first=$?
+
+  if [ "$is_first" -ne 0 ]; then
+    echo "start_namenode_service: this is not the first namenode in the cluster, sleeping for 30 seconds"
+    sleep 30
+  fi
+
   echo "start_namenode_service: checking if namenode service is already running..."
   if ! sudo -u $HADOOP_USER bash -c "source $HADOOP_HOME_DIR/.bashrc && jps | grep -q NameNode"; then
       echo "start_namenode_service: starting namenode service..."
@@ -180,6 +192,29 @@ start_namenode_service() {
   fi
 }
 
+start_zkfs_service() {
+  check_if_first_node
+  is_first=$?
+
+  if [ "$is_first" -ne 0 ]; then
+    echo "start_zkfs_service: this is not the first namenode in the cluster, sleeping for 30 seconds"
+    sleep 30
+  fi
+
+  echo "start_zkfs_service: checking if zkfc service is already running..."
+  if ! sudo -u $HADOOP_USER bash -c "source $HADOOP_HOME_DIR/.bashrc && jps | grep -q DFSZKFailoverController"; then
+      echo "start_zkfs_service: starting zkfc service..."
+      sudo -u $HADOOP_USER bash -c "source $HADOOP_HOME_DIR/.bashrc && hdfs --daemon start zkfc"
+      if [ $? -eq 0 ]; then
+          echo "start_zkfs_service: zkfc service started successfully."
+      else
+          echo "start_zkfs_service: failed to start zkfc service. Check the logs for details."
+      fi
+  else
+      echo "start_zkfs_service: zkfc service is already running."
+  fi
+}
+
 # ------------------------------
 # main
 # ------------------------------
@@ -188,5 +223,5 @@ configure_hadoop_site
 create_fencing_script
 configure_namenode_data_dir
 configure_namenode_zkfc
-start_zkfs_service
 start_namenode_service
+start_zkfs_service

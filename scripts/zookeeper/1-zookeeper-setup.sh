@@ -30,8 +30,8 @@ download_zookeeper() {
     else
         url="https://downloads.apache.org/zookeeper/zookeeper-$ZOOKEEPER_VERSION/apache-zookeeper-$ZOOKEEPER_VERSION-bin.tar.gz"
         echo "download_zookeeper: downloading zookeeper from $url"
-        wget $url
-        sudo tar -xzvf apache-zookeeper-$ZOOKEEPER_VERSION-bin.tar.gz -C /usr/local
+        wget -q $url
+        sudo tar -xzf apache-zookeeper-$ZOOKEEPER_VERSION-bin.tar.gz -C /usr/local
         sudo mv /usr/local/apache-zookeeper-$ZOOKEEPER_VERSION-bin $ZOOKEEPER_HOME
         sudo chown -R $ZOOKEEPER_USER:$ZOOKEEPER_USER $ZOOKEEPER_HOME
     fi
