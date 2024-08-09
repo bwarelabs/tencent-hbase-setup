@@ -10,7 +10,7 @@ HADOOP_USER="hadoop"
 ZOOKEEPER_IPS_EDITS_SEMICOLONS=$(echo $ZOOKEEPER_IPS_EDITS | sed 's/,/;/g')
 
 configure_hadoop_site() {
-    echo "configure_hadoop_site: configure hadoop site"
+    echo "configure_hadoop_site: configure hadoop site for namenode"
       IFS=',' read -r -a NAMENODES_IPS_ARRAY <<< "$NAMENODES_IPS"
     echo "configure_hadoop_site: ${NAMENODES_IPS_ARRAY[@]}"
 
@@ -91,6 +91,11 @@ EOT
   <property>
     <name>dfs.ha.fencing.methods</name>
     <value>shell($HADOOP_HOME_DIR/hadoop-$HADOOP_VERSION/scripts/fencing.sh)</value>
+  </property>
+
+  <property>
+    <name>dfs.namenode.datanode.registration.ip-hostname-check</name>
+    <value>false</value>
   </property>
 </configuration>
 EOT
