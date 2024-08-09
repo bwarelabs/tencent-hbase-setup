@@ -98,13 +98,18 @@ EOT
 
 check_if_first_node() {
   hostname=$(hostname)
-  index=$(echo $hostname | awk -F'-' '{print $2}')
+  index=$(echo "$hostname" | awk -F'-' '{print $NF}')
 
-  if [ "$index" -eq 0 ]; then
-    echo "check_if_first_node: this is the first node in the cluster"
-    return 0
+  if [[ "$index" =~ ^[0-9]+$ ]]; then
+    if [ "$index" -eq 0 ]; then
+      echo "check_if_first_node: this is the first node in the cluster"
+      return 0
+    else
+      echo "check_if_first_node: this is not the first node in the cluster"
+      return 1
+    fi
   else
-    echo "check_if_first_node: this is not the first node in the cluster"
+    echo "check_if_first_node: hostname does not contain a valid numeric index"
     return 1
   fi
 }
@@ -142,24 +147,40 @@ configure_namenode_data_dir() {
     fi  
   fi
 
-  sudo chown -R $HADOOP_USER:$HADOOP_USER $HADOOP_DATA_DIR/current
+  sudo chown -R $HADOOP_USER:$HADOOP_USER $HADOOP_DATA_DIR
 }
 
+bootstrap_secondary_namenodes() {
+  check_if_first_node
+  is_first=$?
+  if [ -z "$(ls -A $HADOOP_DATA_DIR)" ]; then
+    if [ "$is_first" -ne 0 ]; then
+      echo "bootstrap_secondary_namenodes: bootstrapping secondary namenodes"
+      sudo -u $HADOOP_USER bash -c "source $HADOOP_HOME_DIR/.bashrc && hdfs namenode -bootstrapStandby"
+    fi
+  fi
+}
 
 configure_namenode_zkfc() {
+  check_if_first_node
+  is_first=$?
   echo "configure_namenode_zkfc: "
   FLAG_FILE="/var/lib/hadoop-hdfs/zkfc_format_done"
   if ! sudo -u $HADOOP_USER bash -c "source $HADOOP_HOME_DIR/.bashrc && jps | grep -q DFSZKFailoverController"; then
     if [ ! -f "$FLAG_FILE" ]; then
-      echo "configure_namenode_zkfc: formatting zookeeper for hdfs..."
-      sudo -u hadoop $HADOOP_HOME_DIR/hadoop-$HADOOP_VERSION/bin/hdfs zkfc -formatZK
-      
-      if [ $? -eq 0 ]; then
-        echo "configure_namenode_zkfc: zooKeeper formatting completed successfully."
-        touch "$FLAG_FILE"
-      else
-        echo "configure_namenode_zkfc: zooKeeper formatting failed."
-        exit 1
+      if [ "$is_first" -eq 0 ]; then
+        echo "configure_namenode_zkfc: formatting zookeeper for hdfs..."
+        sudo -u hadoop $HADOOP_HOME_DIR/hadoop-$HADOOP_VERSION/bin/hdfs zkfc -formatZK
+        
+        if [ $? -eq 0 ]; then
+          echo "configure_namenode_zkfc: zookeeper formatting completed successfully."
+          touch "$FLAG_FILE"
+        else
+          echo "configure_namenode_zkfc: zookeeper formatting failed."
+          exit 1
+        fi
+      else 
+        echo "configure_namenode_zkfc: zookepeer formatting is not required, this is not the first namenode"
       fi
     else
       echo "configure_namenode_zkfc: zooKeeper has already been formatted."
@@ -222,6 +243,7 @@ start_zkfs_service() {
 configure_hadoop_site
 create_fencing_script
 configure_namenode_data_dir
+bootstrap_secondary_namenodes
 configure_namenode_zkfc
 start_namenode_service
 start_zkfs_service

@@ -1,7 +1,7 @@
 locals {
-  zookeeper_setup          = "/scripts/zookeeper/1-zookeeper-setup.sh"
-  zookeeper_qjournal_setup = "/scripts/zookeeper/2-zookeeper-qjournal-setup.sh"
-  zookeeper_ips            = join(",", tencentcloud_instance.zookeeper_node[*].private_ip)
+  zookeeper_setup         = "/scripts/zookeeper/1-zookeeper-setup.sh"
+  zookeeper_journal_setup = "/scripts/zookeeper/2-zookeeper-journal-setup.sh"
+  zookeeper_ips           = join(",", tencentcloud_instance.zookeeper_node[*].private_ip)
 }
 
 resource "tencentcloud_tat_command" "zookeeper-setup" {
@@ -25,9 +25,9 @@ resource "tencentcloud_tat_command" "zookeeper-setup" {
 }
 
 resource "tencentcloud_tat_command" "qjournal-setup" {
-  command_name      = "2-zookeeper-qjournal-setup"
-  content           = file(join("", [path.module, local.zookeeper_qjournal_setup]))
-  description       = "Install and configure Qjournal on the Zookeeper nodes"
+  command_name      = "2-zookeeper-journal-setup"
+  content           = file(join("", [path.module, local.zookeeper_journal_setup]))
+  description       = "Install and configure Journal on the Zookeeper nodes"
   command_type      = "SHELL"
   timeout           = 1200
   username          = "root"

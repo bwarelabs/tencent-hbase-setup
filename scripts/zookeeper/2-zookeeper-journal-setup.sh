@@ -36,8 +36,8 @@ install_hadoop_packages() {
     fi
 }
 
-configure_qjournal_nodes() {
-    echo "configure_qjournal_nodes: configuring Hadoop JournalNodes..."
+configure_journal_nodes() {
+    echo "configure_journal_nodes: configuring Hadoop JournalNodes..."
     sudo mkdir -p $HADOOP_DATA_DIR
     sudo chown -R $HADOOP_USER:$HADOOP_USER $HADOOP_DATA_DIR
 
@@ -56,19 +56,6 @@ configure_qjournal_nodes() {
 EOT
 
     sudo chown -R $HADOOP_USER:$HADOOP_USER $HADOOP_HOME_DIR
-}
-
-check_if_first_node() {
-  hostname=$(hostname)
-  index=$(echo $hostname | awk -F'-' '{print $2}')
-
-  if [ "$index" -eq 0 ]; then
-    echo "check_if_first_node: this is the first node in the cluster"
-    return 0
-  else
-    echo "check_if_first_node: this is not the first node in the cluster"
-    return 1
-  fi
 }
 
 set_environment_variables() {
@@ -94,12 +81,12 @@ set_environment_variables() {
   fi
 }
 
-start_qjournal_nodes() {
-  echo "start_qjournal_nodes: checking if zkfc JournalNode is already running..."
+start_journal_nodes() {
+  echo "start_journal_nodes: checking if zkfc JournalNode is already running..."
   if ! sudo -u $HADOOP_USER bash -c "source $HADOOP_HOME_DIR/.bashrc && jps | grep -q JournalNode"; then
     sudo -u $HADOOP_USER bash -c "source $HADOOP_HOME_DIR/.bashrc && hdfs --daemon start journalnode"
   else
-    echo "start_qjournal_nodes: JournalNode service is already running."
+    echo "start_journal_nodes: JournalNode service is already running."
   fi
 }
 
@@ -110,6 +97,6 @@ start_qjournal_nodes() {
 install_machine_packages
 create_hadoop_user
 install_hadoop_packages
-configure_qjournal_nodes
+configure_journal_nodes
 set_environment_variables
-start_qjournal_nodes
+start_journal_nodes
