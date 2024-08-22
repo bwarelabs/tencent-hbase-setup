@@ -26,7 +26,6 @@ configure_hbase_site() {
         <value>true</value>
     </property>
 
-    <!-- HDFS settings -->
     <property>
         <name>hbase.rootdir</name>
         <value>hdfs://solana/hbase</value>
@@ -35,8 +34,24 @@ configure_hbase_site() {
         <name>dfs.client.failover.proxy.provider.solana</name>
         <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
     </property>
-    
-    <!-- HBase settings -->
+
+    <property>
+        <name>hbase.master.ha.enabled</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>hbase.master.ha.zk.quorum</name>
+        <value>$ZOOKEEPER_IPS</value>
+    </property>
+    <property>
+        <name>hbase.master.ha.zk.port</name>
+        <value>2181</value>
+    </property>
+    <property>
+        <name>hbase.master.ha.zk.namespace</name>
+        <value>hbase</value>
+    </property>    
+
     <property>
         <name>hbase.cluster.distributed</name>
         <value>true</value>
@@ -48,10 +63,6 @@ configure_hbase_site() {
     <property>
         <name>hbase.zookeeper.property.clientPort</name>
         <value>2181</value>
-    </property>
-    <property>
-        <name>hbase.master</name>
-        <value>$HBASE_MASTERS_IPS</value>
     </property>
     <property>
         <name>hbase.master.wait.on.regionservers.mintostart</name>

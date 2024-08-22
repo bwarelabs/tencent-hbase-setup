@@ -63,7 +63,7 @@ set_hosts_file() {
 
     for i in "${!MANAGEMENT_IP_ARRAY[@]}"; do
         echo "set_hosts_file: adding ${MANAGEMENT_IP_ARRAY[i]} ${MANAGEMENT_INSTANCE_NAME}-${i}"
-        echo "${MANAGEMENT_IP_ARRAY[i]} ${MANAGEMENT_INSTANCE_NAME}-${i}" >> /etc/hosts
+        echo "${MANAGEMENT_IP_ARRAY[i]} solana ${MANAGEMENT_INSTANCE_NAME}-${i}" >> /etc/hosts
     done
 
     # Add worker nodes to /etc/hosts
@@ -71,8 +71,6 @@ set_hosts_file() {
         echo "set_hosts_file: adding ${WORKER_IP_ARRAY[i]} ${WORKERS_INSTANCE_NAME}-${i}"
         echo "${WORKER_IP_ARRAY[i]} ${WORKERS_INSTANCE_NAME}-${i}" >> /etc/hosts
     done
-    
-    echo "${MANAGEMENT_IP_ARRAY[0]} solana" >> /etc/hosts
 }
 
 create_hbase_user
