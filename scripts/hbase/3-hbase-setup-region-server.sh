@@ -68,7 +68,7 @@ create_hbase_directories() {
 
 start_hbase_service() {
   echo "start_hbase_service: checking if hbase service is already running..."
-  if ! sudo -u $HBASE_USER bash -c "source $HBASE_HOME/.bashrc && ps aux | grep HRegionServer"; then
+  if ! sudo -u $HBASE_USER bash -c "source $HBASE_HOME/.bashrc && ps aux | grep '[H]RegionServer'"; then
       echo "start_hbase_service: starting hbase service..."
       sudo -u $HBASE_USER bash -c "source $HBASE_HOME/.bashrc && hbase-daemon.sh start regionserver"
       if [ $? -eq 0 ]; then
