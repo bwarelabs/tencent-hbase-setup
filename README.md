@@ -5,7 +5,7 @@
   - [Provisioning](#provisioning)
     - [the infrastructure](#the-infrastructure)
     - [the Zookeeper cluster](#the-zookeeper-cluster)
-    - [the HDFS cluster](#the-hdfs-cluster)
+    - [the HDFS Cluster](#the-hdfs-cluster)
     - [the Hbase cluster](#the-hbase-cluster)
   - [Requirements](#requirements)
   - [Providers](#providers)
@@ -24,7 +24,7 @@ JournalNode Cluster - Employed by the HDFS filesystem to store journal data.
 By default, Zookeeper and JournalNode are co-located on the same nodes. The cluster is initially configured with three nodes.
 
 **Management Nodes**:  
-HDFS NameNodes - Responsible for managing the HDFS worker nodes, these are crucial to the Hadoop ecosystem. The setup uses an active-passive NameNode configuration that supports failover in case the primary node fails. High availability (HA) is managed through Zookeeper.  
+HDFS NameNodes - Responsible for managing the HDFS DataNodes, these are crucial to the Hadoop ecosystem. The setup uses an active-passive NameNode configuration that supports failover in case the primary node fails. High availability (HA) is managed through Zookeeper.  
 HBase Master Nodes - These nodes manage the HBase setup, including overseeing the region servers.  
 Both the HDFS NameNodes and HBase Master Nodes are co-located on the same nodes. By default, two management nodes are provisioned.  
 
@@ -39,13 +39,77 @@ The following sections provide a detailed guide on the steps required to bootstr
 
 ### the infrastructure
 
-In this section, the infrastructure is provisioned, which by default will create a total of eight machines within Tencent Cloud. Various parameters can be adjusted for each category of machines, as detailed in the Inputs section.
+In this section, the infrastructure is provisioned, creating a default total of eight machines within Tencent Cloud. You can adjust various parameters for each machine category as detailed in the Inputs section.  
+Before running Terraform, ensure that the providers.tf file contains the necessary credentials for your Tencent Cloud account. To bootstrap the new infrastructure, execute the following commands in sequence:  
+
+```
+terraform init
+terraform plan
+terraform apply
+```
+
+After executing the Terraform code, the three machine categories will be created. You can view these machines in the Tencent Cloud console by navigating to the Cloud Virtual Machine service.  
+From this section onward, the TAT commands must be used to configure Zookeeper, HDFS and Hbase.
 
 ### the Zookeeper cluster
+The Zookeeper cluster, which also runs the JournalNode service, is configured by executing the following TAT commands in order:  
 
-### the HDFS cluster
+**1-zookeeper-setup**: Execute this command first, selecting only the Zookeeper nodes (e.g., zookeeper-0, zookeeper-1, and zookeeper-2). This command configures the Zookeeper cluster.  
+**2-zookeeper-journal-setup**: After successfully executing the previous command, run this command on the same Zookeeper nodes. It configures the JournalNode cluster on these machines.  
+At this stage, both Zookeeper and JournalNodes should be up and running.  
+
+### the HDFS Cluster
+The HDFS cluster, composed of NameNodes and DataNodes, is configured by executing the following TAT commands in sequence:  
+
+**1-hadoop-hdfs-setup-common-nodes**: This command applies a common configuration to all nodes in the HDFS setup. Ensure you select all relevant nodes (e.g., hbase-management-0, hbase-management-1, hbase-worker-0, and hbase-worker-1) to prepare them for the HDFS setup.  
+**2-management-hdfs-setup-namenodes**: Since the HDFS cluster's NameNodes are configured for high availability (HA), you must first run this command on the primary NameNode (e.g., hbase-management-0). After it completes successfully, run the same command on the secondary NameNode (e.g., hbase-management-1).  
+**1-worker-hdfs-setup-datanodes**: Once the NameNodes are operational, configure the HDFS DataNodes by executing this command and selecting the worker nodes (e.g., hbase-worker-0 and hbase-worker-1).  
+
+If all the above commands have been executed in this exact order the HDFS cluster should be up and running. The state of the cluster can be verified by ssh-ing into one of the NameNodes machines, e.g. hbase-management-0 and executing the following commands:
+
+```
+su hadoop
+cd /usr/local/hadoop/hadoop-3.4.0/
+./bin/hdfs dfsadmin -report
+```
+
+The command should output something as follows which indicates the HDFS cluster is healthy:
+
+```
+Configured Capacity: 105552699392 (98.30 GB)
+Present Capacity: 81349865472 (75.76 GB)
+DFS Remaining: 81349816320 (75.76 GB)
+DFS Used: 49152 (48 KB)
+DFS Used%: 0.00%
+Replicated Blocks:
+        Under replicated blocks: 0
+        Blocks with corrupt replicas: 0
+        Missing blocks: 0
+        Missing blocks (with replication factor 1): 0
+        Low redundancy blocks with highest priority to recover: 0
+        Pending deletion blocks: 0
+Erasure Coded Block Groups: 
+        Low redundancy block groups: 0
+        Block groups with corrupt internal blocks: 0
+        Missing block groups: 0
+        Low redundancy blocks with highest priority to recover: 0
+        Pending deletion blocks: 0
+```
 
 ### the Hbase cluster
+
+The HBase cluster is the final component of the Hadoop ecosystem that must be configured. Execute the following TAT commands in sequence:  
+
+**1-hbase-setup-common-nodes**: This command applies common HBase configurations to all nodes. Be sure to select all nodes (e.g., hbase-management-0, hbase-management-1, hbase-worker-0, and hbase-worker-1).  
+**2-hbase-setup-master**: This command configures the HBase master nodes. Since HBase utilizes a high-availability (HA) setup, first execute this command on the primary management node (e.g., hbase-management-0) and wait for it to complete.  
+**3-hbase-setup-region-servers**: Run this command to configure the HBase region servers, ensuring you select only the worker nodes (e.g., hbase-worker-0 and hbase-worker-1).  
+**2-hbase-setup-master**: Finally, execute the master node setup command again on the secondary management node (e.g., hbase-management-1). This will add the second HBase master node to the setup.  
+
+```
+su hbase
+cd /usr/local/hbase/hbase-2.6.0/
+./bin/hbase shell
+```
 
 ## Requirements
 
