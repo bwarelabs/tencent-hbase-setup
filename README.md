@@ -54,16 +54,16 @@ From this section onward, the TAT commands must be used to configure Zookeeper, 
 ### the Zookeeper cluster
 The Zookeeper cluster, which also runs the JournalNode service, is configured by executing the following TAT commands in order:  
 
-**1-zookeeper-setup**: Execute this command first, selecting only the Zookeeper nodes (e.g., zookeeper-0, zookeeper-1, and zookeeper-2). This command configures the Zookeeper cluster.  
+**1-zookeeper-setup**: Execute this command first, selecting only the Zookeeper nodes (e.g. zookeeper-0, zookeeper-1, and zookeeper-2). This command configures the Zookeeper cluster.  
 **2-zookeeper-journal-setup**: After successfully executing the previous command, run this command on the same Zookeeper nodes. It configures the JournalNode cluster on these machines.  
 At this stage, both Zookeeper and JournalNodes should be up and running.  
 
 ### the HDFS Cluster
 The HDFS cluster, composed of NameNodes and DataNodes, is configured by executing the following TAT commands in sequence:  
 
-**1-hadoop-hdfs-setup-common-nodes**: This command applies a common configuration to all nodes in the HDFS setup. Ensure you select all relevant nodes (e.g., hbase-management-0, hbase-management-1, hbase-worker-0, and hbase-worker-1) to prepare them for the HDFS setup.  
-**2-management-hdfs-setup-namenodes**: Since the HDFS cluster's NameNodes are configured for high availability (HA), you must first run this command on the primary NameNode (e.g., hbase-management-0). After it completes successfully, run the same command on the secondary NameNode (e.g., hbase-management-1).  
-**1-worker-hdfs-setup-datanodes**: Once the NameNodes are operational, configure the HDFS DataNodes by executing this command and selecting the worker nodes (e.g., hbase-worker-0 and hbase-worker-1).  
+**1-hadoop-hdfs-setup-common-nodes**: This command applies a common configuration to all nodes in the HDFS setup. Ensure you select all relevant nodes (e.g. hbase-management-0, hbase-management-1, hbase-worker-0, and hbase-worker-1) to prepare them for the HDFS setup.  
+**2-management-hdfs-setup-namenodes**: Since the HDFS cluster's NameNodes are configured for high availability (HA), you must first run this command on the primary NameNode (e.g. hbase-management-0). After it completes successfully, run the same command on the secondary NameNode (e.g. hbase-management-1).  
+**1-worker-hdfs-setup-datanodes**: Once the NameNodes are operational, configure the HDFS DataNodes by executing this command and selecting the worker nodes (e.g. hbase-worker-0 and hbase-worker-1).  
 
 If all the above commands have been executed in this exact order the HDFS cluster should be up and running. The state of the cluster can be verified by ssh-ing into one of the NameNodes machines, e.g. hbase-management-0 and executing the following commands:
 
@@ -100,9 +100,9 @@ Erasure Coded Block Groups:
 
 The HBase cluster is the final component of the Hadoop ecosystem that must be configured. Execute the following TAT commands in sequence:  
 
-**1-hbase-setup-common-nodes**: This command applies common HBase configurations to all nodes. Be sure to select all nodes (e.g., hbase-management-0, hbase-management-1, hbase-worker-0, and hbase-worker-1).  
-**2-hbase-setup-master**: This command configures the HBase master nodes. Execute this command on the first primary management node (e.g., hbase-management-0) and wait for it to complete.  
-**3-hbase-setup-region-servers**: Run this command to configure the HBase region servers, ensuring you select only the worker nodes (e.g., hbase-worker-0 and hbase-worker-1).  
+**1-hbase-setup-common-nodes**: This command applies common HBase configurations to all nodes. Be sure to select all nodes (e.g. hbase-management-0, hbase-management-1, hbase-worker-0, and hbase-worker-1).  
+**2-hbase-setup-master**: This command configures the HBase master nodes. Execute this command on the first primary management node (e.g. hbase-management-0) and wait for it to complete.  
+**3-hbase-setup-region-servers**: Run this command to configure the HBase region servers, ensuring you select only the worker nodes (e.g. hbase-worker-0 and hbase-worker-1).  
 
 To verify that the Hbase cluster is up and running execute the following commands:
 ```
