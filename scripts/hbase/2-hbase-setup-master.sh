@@ -67,6 +67,15 @@ configure_hbase_site() {
         <name>hbase.regionserver.lease.period</name>
         <value>600000</value>
     </property>
+
+    <property>
+        <name>hbase.regionserver.thrift.enabled</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>hbase.thrift.support.proxyuser</name>
+        <value>true</value>
+    </property>
 </configuration>
 EOF
 }
@@ -102,8 +111,24 @@ start_hbase_service() {
   fi
 }
 
+start_thrift_service() {
+    echo "start_thrift_service: checking if thrift service is already running..."
+    if ! sudo -u $HBASE_USER bash -c "source $HBASE_HOME/.bashrc && ps aux | grep '[T]hriftServer'"; then
+        echo "start_thrift_service: starting thrift service..."
+        sudo -u $HBASE_USER bash -c "source $HBASE_HOME/.bashrc && hbase-daemon.sh start thrift"
+        if [ $? -eq 0 ]; then
+            echo "start_thrift_service: thrift service started successfully."
+        else
+            echo "start_thrift_service: failed to start thrift service. Check the logs for details."
+        fi
+    else
+        echo "start_thrift_service: thrift service is already running."
+    fi
+}
+
 configure_hbase_site
 copy_configuration_files
 set_hbase_owner
 create_hbase_directories
 start_hbase_service
+start_thrift_service

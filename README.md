@@ -39,8 +39,8 @@ The following sections provide a detailed guide on the steps required to bootstr
 
 ### the Infrastructure
 
-In this section, the infrastructure is provisioned, creating a default total of eight machines within Tencent Cloud. You can adjust various parameters for each machine category as detailed in the Inputs section.  
-Before running Terraform, ensure that the providers.tf file contains the necessary credentials for your Tencent Cloud account. To bootstrap the new infrastructure, execute the following commands in sequence:  
+In this section, the infrastructure is provisioned, creating a default total of seven machines within Tencent Cloud. You can adjust various parameters for each machine category as detailed in the Inputs section.  
+Before running Terraform, ensure that the *providers.tf* file contains the necessary credentials for your Tencent Cloud account. To bootstrap the new infrastructure, execute the following commands in sequence:  
 
 ```
 terraform init
