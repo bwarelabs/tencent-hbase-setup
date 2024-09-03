@@ -3,7 +3,7 @@
 - [Tencent HBASE setup](#tencent-hbase-setup)
   - [Description](#description)
   - [Provisioning](#provisioning)
-    - [the infrastructure](#the-infrastructure)
+    - [the Infrastructure](#the-infrastructure)
     - [the Zookeeper cluster](#the-zookeeper-cluster)
     - [the HDFS Cluster](#the-hdfs-cluster)
     - [the Hbase cluster](#the-hbase-cluster)
@@ -37,7 +37,7 @@ The pool of worker nodes can be scaled as needed by increasing the number of ser
 
 The following sections provide a detailed guide on the steps required to bootstrap a new HBase cluster. Several tasks must be completed to ensure the successful deployment of the entire cluster. Initially, the infrastructure must be provisioned in the cloud. Following that, a series of Tencent Automation Tools (TAT) commands must be executed for each category of machines, as outlined in the subsequent sections.
 
-### the infrastructure
+### the Infrastructure
 
 In this section, the infrastructure is provisioned, creating a default total of eight machines within Tencent Cloud. You can adjust various parameters for each machine category as detailed in the Inputs section.  
 Before running Terraform, ensure that the providers.tf file contains the necessary credentials for your Tencent Cloud account. To bootstrap the new infrastructure, execute the following commands in sequence:  
@@ -104,11 +104,14 @@ The HBase cluster is the final component of the Hadoop ecosystem that must be co
 **2-hbase-setup-master**: This command configures the HBase master nodes. Execute this command on the first primary management node (e.g., hbase-management-0) and wait for it to complete.  
 **3-hbase-setup-region-servers**: Run this command to configure the HBase region servers, ensuring you select only the worker nodes (e.g., hbase-worker-0 and hbase-worker-1).  
 
+To verify that the Hbase cluster is up and running execute the following commands:
 ```
 su hbase
 cd /usr/local/hbase/hbase-2.6.0/
 ./bin/hbase shell
+status
 ```
+You should see the two worker nodes added in the cluster and the active master healthy.
 
 ## Requirements
 
