@@ -62,11 +62,15 @@ set_hosts_file() {
     echo "set_hosts_file: setting hosts file machines entries for local lookup"
 
     for i in "${!MANAGEMENT_IP_ARRAY[@]}"; do
-        echo "set_hosts_file: adding ${MANAGEMENT_IP_ARRAY[i]} ${MANAGEMENT_INSTANCE_NAME}-${i}"
-        echo "${MANAGEMENT_IP_ARRAY[i]} solana ${MANAGEMENT_INSTANCE_NAME}-${i}" >> /etc/hosts
+        if [ "$i" -eq 0 ]; then
+            echo "set_hosts_file: adding ${MANAGEMENT_IP_ARRAY[i]} solana ${MANAGEMENT_INSTANCE_NAME}-${i}"
+            echo "${MANAGEMENT_IP_ARRAY[i]} solana ${MANAGEMENT_INSTANCE_NAME}-${i}" >> /etc/hosts
+        else
+            echo "set_hosts_file: adding ${MANAGEMENT_IP_ARRAY[i]} ${MANAGEMENT_INSTANCE_NAME}-${i}"
+            echo "${MANAGEMENT_IP_ARRAY[i]} ${MANAGEMENT_INSTANCE_NAME}-${i}" >> /etc/hosts
+        fi
     done
 
-    # Add worker nodes to /etc/hosts
     for i in "${!WORKER_IP_ARRAY[@]}"; do
         echo "set_hosts_file: adding ${WORKER_IP_ARRAY[i]} ${WORKERS_INSTANCE_NAME}-${i}"
         echo "${WORKER_IP_ARRAY[i]} ${WORKERS_INSTANCE_NAME}-${i}" >> /etc/hosts

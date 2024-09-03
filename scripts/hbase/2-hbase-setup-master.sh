@@ -22,11 +22,6 @@ configure_hbase_site() {
     </property>
 
     <property>
-        <name>hbase.cluster.distributed</name>
-        <value>true</value>
-    </property>
-
-    <property>
         <name>hbase.rootdir</name>
         <value>hdfs://solana/hbase</value>
     </property>
