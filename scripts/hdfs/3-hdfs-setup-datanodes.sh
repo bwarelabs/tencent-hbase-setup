@@ -5,6 +5,7 @@ HADOOP_HOME_DIR={{hadoop_home}}
 NAMENODES_IPS={{namenodes_ips}}
 HADOOP_DATA_DIR=$HADOOP_HOME_DIR/hadoop-$HADOOP_VERSION/data
 HADOOP_USER="hadoop"
+DATA_DISK_NAME="/dev/vdb"
 
 configure_hadoop_site() {
     echo "configure_hadoop_site: configure hadoop site for datanode"
@@ -53,10 +54,34 @@ EOT
     echo "</configuration>" >> $HADOOP_HOME_DIR/hadoop-$HADOOP_VERSION/etc/hadoop/hdfs-site.xml
 }
 
-configure_datanode_data_dir() {
-    echo "configure_datanode_data_dir: setting up datanode directories"
-    sudo mkdir -p $HADOOP_DATA_DIR
-    sudo chown -R $HADOOP_USER:$HADOOP_USER $HADOOP_DATA_DIR
+mount_data_disk() {
+  echo "mount_data_disk: mounting hadoop data dir..."
+
+  sudo mkdir -p $HADOOP_DATA_DIR
+
+  if mount | grep "$HADOOP_DATA_DIR" > /dev/null; then
+    echo "mount_data_disk: disk is already mounted at $HADOOP_DATA_DIR."
+    return
+  fi
+
+  if ! blkid | grep "$DATA_DISK"; then
+    echo "mount_data_disk: formatting the disk $DATA_DISK as ext4."
+    mkfs.ext4 $DATA_DISK
+  else
+    echo "mount_data_disk: $DATA_DISK is already formatted."
+  fi
+
+  echo "mount_data_disk: mounting $DATA_DISK to $HADOOP_DATA_DIR."
+  mount $DATA_DISK $HADOOP_DATA_DIR
+
+  sudo chown -R $HADOOP_USER:$HADOOP_USER $HADOOP_DATA_DIR
+
+  if ! grep -q "$DATA_DISK" /etc/fstab; then
+    echo "$DATA_DISK $HADOOP_DATA_DIR ext4 defaults 0 0" >> /etc/fstab
+    echo "mount_data_disk: added $DATA_DISK to /etc/fstab for persistence."
+  fi
+
+  echo "mount_data_disk: data disk mounted successfully!"
 }
 
 start_datanode_service() {
@@ -78,6 +103,6 @@ start_datanode_service() {
 # main
 # ------------------------------
 
+mount_data_disk
 configure_hadoop_site
-configure_datanode_data_dir
 start_datanode_service
