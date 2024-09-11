@@ -5,7 +5,7 @@ HADOOP_HOME_DIR={{hadoop_home}}
 NAMENODES_IPS={{namenodes_ips}}
 HADOOP_DATA_DIR=$HADOOP_HOME_DIR/hadoop-$HADOOP_VERSION/data
 HADOOP_USER="hadoop"
-DATA_DISK_NAME="/dev/vdb"
+DATA_DISK="/dev/vdb"
 
 configure_hadoop_site() {
     echo "configure_hadoop_site: configure hadoop site for datanode"
@@ -29,6 +29,11 @@ configure_hadoop_site() {
   <!-- Define the NameNode directories for storing metadata -->
   <property>
     <name>dfs.namenode.name.dir</name>
+    <value>file://$HADOOP_DATA_DIR</value>
+  </property>
+
+  <property>
+    <name>dfs.datanode.data.dir</name>
     <value>file://$HADOOP_DATA_DIR</value>
   </property>
 
