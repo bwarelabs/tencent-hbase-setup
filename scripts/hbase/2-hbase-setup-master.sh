@@ -76,6 +76,30 @@ configure_hbase_site() {
         <name>hbase.thrift.support.proxyuser</name>
         <value>true</value>
     </property>
+    <property>
+        <name>hbase.server.keyvalue.maxsize</name>
+        <value>104857600</value>
+    </property>
+    <!-- default is 256MB 268435456, this is 1.5GB -->
+    <property>
+        <name>hbase.hregion.max.filesize</name>
+        <value>1610612736</value>
+    </property>
+    <!-- default is 2 -->
+    <property>
+        <name>hbase.hregion.memstore.block.multiplier</name>
+        <value>4</value>
+    </property>
+    <!-- default is 64MB 67108864 -->
+    <property>
+        <name>hbase.hregion.memstore.flush.size</name>
+        <value>134217728</value>
+    </property>
+    <!-- default is 7, should be at least 2x compactionThreshold -->
+    <property>
+        <name>hbase.hstore.blockingStoreFiles</name>
+        <value>200</value>
+    </property>
 </configuration>
 EOF
 }
