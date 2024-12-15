@@ -106,7 +106,7 @@ variable "zookeeper_system_disk_type" {
 variable "zookeeper_system_disk_size" {
   type        = number
   description = "The instace system disk size"
-  default     = 50
+  default     = 500
 }
 
 # DATA DISK

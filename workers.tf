@@ -27,10 +27,13 @@ resource "tencentcloud_instance" "hbase_workers_node" {
   instance_charge_type_prepaid_period = var.workers_instance_charge_type_prepaid_period
   # instance_charge_type_prepaid_renew_flag = var.instance_charge_type_prepaid_renew_flag
 
-  data_disks {
-    data_disk_type = var.workers_data_disk_type
-    data_disk_size = var.workers_data_disk_size
-    encrypt        = var.workers_data_disk_encrypt
+  dynamic "data_disks" {
+      for_each = range(var.workers_data_disk_count)
+      content {
+        data_disk_type = var.workers_data_disk_type
+        data_disk_size = var.workers_data_disk_size
+        encrypt        = var.workers_data_disk_encrypt
+      }
   }
 
   force_delete = var.workers_force_delete

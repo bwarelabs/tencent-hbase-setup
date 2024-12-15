@@ -27,7 +27,7 @@ variable "workers_image_name_regex" {
 variable "workers_instance_count" {
   type        = number
   description = "The number of Hbase worker nodes to bootstrap"
-  default     = 5
+  default     = 2
 }
 
 variable "workers_instance_name" {
@@ -110,6 +110,12 @@ variable "workers_system_disk_size" {
 }
 
 # DATA DISK
+variable "workers_data_disk_count" {
+  type        = number
+  description = "Number of disks per worker node"
+  default     = 8
+}
+
 variable "workers_data_disk_type" {
   type        = string
   description = "The instace workers disk type"
@@ -119,7 +125,7 @@ variable "workers_data_disk_type" {
 variable "workers_data_disk_size" {
   type        = number
   description = "The instace workers disk size"
-  default     = 2000
+  default     = 6500
 }
 
 variable "workers_data_disk_encrypt" {
