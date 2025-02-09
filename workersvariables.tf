@@ -32,7 +32,7 @@ variable "workers_instance_count" {
 
 variable "workers_instance_name" {
   type        = string
-  description = "The instace name prefix"
+  description = "The instance name prefix"
   default     = "hbase-worker"
 }
 
@@ -44,7 +44,7 @@ variable "workers_instance_project" {
 
 variable "workers_instance_type" {
   type        = string
-  description = "The instace type"
+  description = "The instance type"
   default     = "SA5.MEDIUM4"
 }
 
@@ -99,13 +99,13 @@ variable "workers_instance_tags" {
 
 variable "workers_system_disk_type" {
   type        = string
-  description = "The instace system disk type"
+  description = "The instance system disk type"
   default     = "CLOUD_BSSD"
 }
 
 variable "workers_system_disk_size" {
   type        = number
-  description = "The instace system disk size"
+  description = "The instance system disk size"
   default     = 50
 }
 
@@ -118,13 +118,13 @@ variable "workers_data_disk_count" {
 
 variable "workers_data_disk_type" {
   type        = string
-  description = "The instace workers disk type"
+  description = "The instance workers disk type"
   default     = "CLOUD_BSSD"
 }
 
 variable "workers_data_disk_size" {
   type        = number
-  description = "The instace workers disk size"
+  description = "The instance workers disk size"
   default     = 6500
 }
 

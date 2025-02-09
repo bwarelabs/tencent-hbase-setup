@@ -32,7 +32,7 @@ variable "zookeeper_instance_count" {
 
 variable "zookeeper_instance_name" {
   type        = string
-  description = "The instace zookeeper name prefix"
+  description = "The instance zookeeper name prefix"
   default     = "zookeeper"
 }
 
@@ -44,7 +44,7 @@ variable "zookeeper_instance_project" {
 
 variable "zookeeper_instance_type" {
   type        = string
-  description = "The instace type"
+  description = "The instance type"
   default     = "SA5.MEDIUM4"
 }
 
@@ -99,26 +99,26 @@ variable "zookeeper_instance_tags" {
 
 variable "zookeeper_system_disk_type" {
   type        = string
-  description = "The instace system disk type"
+  description = "The instance system disk type"
   default     = "CLOUD_BSSD"
 }
 
 variable "zookeeper_system_disk_size" {
   type        = number
-  description = "The instace system disk size"
+  description = "The instance system disk size"
   default     = 500
 }
 
 # DATA DISK
 variable "zookeeper_data_disk_type" {
   type        = string
-  description = "The instace data disk type"
+  description = "The instance data disk type"
   default     = "CLOUD_BSSD"
 }
 
 variable "zookeeper_data_disk_size" {
   type        = number
-  description = "The instace data disk size"
+  description = "The instance data disk size"
   default     = 50
 }
 

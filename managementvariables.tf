@@ -32,7 +32,7 @@ variable "management_instance_count" {
 
 variable "management_instance_name" {
   type        = string
-  description = "The instace management name prefix"
+  description = "The instance management name prefix"
   default     = "hbase-management"
 }
 
@@ -44,7 +44,7 @@ variable "management_instance_project" {
 
 variable "management_instance_type" {
   type        = string
-  description = "The instace type"
+  description = "The instance type"
   default     = "SA5.MEDIUM4"
 }
 
@@ -99,26 +99,26 @@ variable "management_instance_tags" {
 
 variable "management_system_disk_type" {
   type        = string
-  description = "The instace system disk type"
+  description = "The instance system disk type"
   default     = "CLOUD_BSSD"
 }
 
 variable "management_system_disk_size" {
   type        = number
-  description = "The instace system disk size"
+  description = "The instance system disk size"
   default     = 100
 }
 
 # DATA DISK
 variable "management_data_disk_type" {
   type        = string
-  description = "The instace data disk type"
+  description = "The instance data disk type"
   default     = "CLOUD_BSSD"
 }
 
 variable "management_data_disk_size" {
   type        = number
-  description = "The instace data disk size"
+  description = "The instance data disk size"
   default     = 50
 }
 
