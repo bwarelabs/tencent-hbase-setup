@@ -12,23 +12,13 @@ HADOOP_USER="hadoop"
 
 HBASE_MASTERS_IPS={{hbase_masters_ips}}
 
-wait_for_hbase_ready() {
-    echo "Waiting for HBase Master and RegionServers to be online..."
-    while ! echo "status 'detailed'" | hbase shell | grep -q "servers"; do
-        sleep 5
-    done
-    echo "HBase Master and RegionServers are active."
-}
-
 create_hbase_tables() {
-    wait_for_hbase_ready  # Ensure everything is up before proceeding
-
     echo "Creating tables if not already present..."
     TABLES=("blocks" "entries" "tx" "tx-by-addr" "tx_full")
 
     for TABLE in "${TABLES[@]}"; do
-        if ! echo "exists '$TABLE'" | hbase shell | grep -q "Table $TABLE does exist"; then
-            echo "create '$TABLE', 'x'" | hbase shell
+        if ! echo "exists '$TABLE'" | sudo -u $HBASE_USER bash -c "source ~/.bashrc && hbase shell" | grep -q "Table $TABLE does exist"; then
+            echo "create '$TABLE', 'x'" | sudo -u $HBASE_USER bash -c "source ~/.bashrc && hbase shell"
             echo "Table $TABLE created successfully."
         else
             echo "Table $TABLE already exists, skipping creation."
@@ -38,5 +28,4 @@ create_hbase_tables() {
     echo "All tables are set up successfully."
 }
 
-# Run table creation process
 create_hbase_tables
