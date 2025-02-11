@@ -6,6 +6,7 @@ locals {
   hdfs_namenodes_ips           = join(",", [for ip in tencentcloud_instance.hbase_management_node[*].private_ip : "${ip}"])
   hbase_setup_common_nodes     = "/scripts/hbase/1-hbase-setup-common-nodes.sh"
   hbase_setup_master           = "/scripts/hbase/2-hbase-setup-master.sh"
+  hbase_setup_tables           = "/scripts/hbase/4-hbase-setup-tables.sh"   
 
   management_instance_ips_ordered = [
     for idx in range(var.management_instance_count) :
@@ -79,6 +80,26 @@ resource "tencentcloud_tat_command" "hbase-setup-master" {
   command_name      = "2-hbase-setup-master"
   content           = file(join("", [path.module, local.hbase_setup_master]))
   description       = "Install and configure the Hbase master settings"
+  command_type      = "SHELL"
+  timeout           = 1200
+  username          = "root"
+  working_directory = "/root"
+  enable_parameter  = true
+  default_parameters = jsonencode({
+    "hbase_version" : var.hbase_version,
+    "hbase_home" : var.hbase_home,
+    "zookeeper_ips" : local.hdfs_zookeeper_ips,
+    "namenodes_ips" : local.hdfs_namenodes_ips,
+    "hadoop_version" : var.hadoop_version,
+    "hadoop_home" : var.hadoop_home,
+    "hbase_masters_ips" : local.hbase_masters_ips,
+  })
+}
+
+resource "tencentcloud_tat_command" "hbase-setup-tables" {
+  command_name      = "4-hbase-setup-tables"
+  content           = file(join("", [path.module, local.hbase_setup_tables]))
+  description       = "Install and configure the Hbase tables settings"
   command_type      = "SHELL"
   timeout           = 1200
   username          = "root"

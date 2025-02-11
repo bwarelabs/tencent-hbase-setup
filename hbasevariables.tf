@@ -5,7 +5,7 @@
 variable "hbase_version" {
   type        = string
   description = "HBASE version to use in the infrastructure"
-  default     = "2.6.0"
+  default     = "2.6.1"
 }
 
 variable "hbase_home" {

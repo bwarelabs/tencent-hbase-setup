@@ -27,12 +27,12 @@ variable "workers_image_name_regex" {
 variable "workers_instance_count" {
   type        = number
   description = "The number of Hbase worker nodes to bootstrap"
-  default     = 5
+  default     = 2
 }
 
 variable "workers_instance_name" {
   type        = string
-  description = "The instace name prefix"
+  description = "The instance name prefix"
   default     = "hbase-worker"
 }
 
@@ -44,7 +44,7 @@ variable "workers_instance_project" {
 
 variable "workers_instance_type" {
   type        = string
-  description = "The instace type"
+  description = "The instance type"
   default     = "SA5.MEDIUM4"
 }
 
@@ -99,27 +99,33 @@ variable "workers_instance_tags" {
 
 variable "workers_system_disk_type" {
   type        = string
-  description = "The instace system disk type"
+  description = "The instance system disk type"
   default     = "CLOUD_BSSD"
 }
 
 variable "workers_system_disk_size" {
   type        = number
-  description = "The instace system disk size"
+  description = "The instance system disk size"
   default     = 50
 }
 
 # DATA DISK
+variable "workers_data_disk_count" {
+  type        = number
+  description = "Number of disks per worker node"
+  default     = 8
+}
+
 variable "workers_data_disk_type" {
   type        = string
-  description = "The instace workers disk type"
+  description = "The instance workers disk type"
   default     = "CLOUD_BSSD"
 }
 
 variable "workers_data_disk_size" {
   type        = number
-  description = "The instace workers disk size"
-  default     = 2000
+  description = "The instance workers disk size"
+  default     = 6500
 }
 
 variable "workers_data_disk_encrypt" {
