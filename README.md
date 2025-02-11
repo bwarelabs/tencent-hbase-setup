@@ -102,7 +102,8 @@ The HBase cluster is the final component of the Hadoop ecosystem that must be co
 
 **1-hbase-setup-common-nodes**: This command applies common HBase configurations to all nodes. Be sure to select all nodes (e.g. hbase-management-0, hbase-management-1, hbase-worker-0, and hbase-worker-1).  
 **2-hbase-setup-master**: This command configures the HBase master nodes. Execute this command on the first primary management node (e.g. hbase-management-0) and wait for it to complete.  
-**3-hbase-setup-region-servers**: Run this command to configure the HBase region servers, ensuring you select only the worker nodes (e.g. hbase-worker-0 and hbase-worker-1).  
+**3-hbase-setup-region-servers**: Run this command to configure the HBase region servers, ensuring you select only the worker nodes (e.g. hbase-worker-0 and hbase-worker-1).
+**4-hbase-setup-tables**: Run this command to create the required Tables, ensuring you select only the first primary management node (e.g. hbase-management-0).
 
 To verify that the Hbase cluster is up and running execute the following commands:
 ```
